@@ -1,7 +1,7 @@
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { Tree, VirtualTree } from '@angular-devkit/schematics';
-import { createApp, createEmptyWorkspace } from '../testing-utils';
+import { createApp, createEmptyWorkspace } from '../../../../shared/testing-utils';
 import { getFileContent } from '@schematics/angular/utility/test';
 
 describe('ngrx', () => {
@@ -125,7 +125,7 @@ describe('ngrx', () => {
     expect(packageJson.dependencies['@ngrx/effects']).toBeDefined();
   });
 
-  fit('should error when no module is provided', () => {
+  it('should error when no module is provided', () => {
     expect(() =>
       schematicRunner.runSchematic(
         'ngrx',

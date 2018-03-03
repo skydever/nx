@@ -34,7 +34,7 @@ describe('Command line', () => {
   );
 
   it(
-    'nx-migrate should run migrations',
+    'update should run migrations',
     () => {
       newProject();
       updateFile(
@@ -48,11 +48,11 @@ describe('Command line', () => {
         };
       `
       );
-      const checkOut = runCommand('npm run nx-migrate:check');
-      expect(checkOut).toContain('Run "npm run nx-migrate" to run the following migrations');
+      const checkOut = runCommand('npm run update:check');
+      expect(checkOut).toContain('Run "npm run update" to run the following migrations');
       expect(checkOut).toContain('20200101-test-migration');
 
-      const migrateOut = runCommand('npm run nx-migrate');
+      const migrateOut = runCommand('npm run update');
       expect(migrateOut).toContain('Test migration');
       expect(migrateOut).toContain('Running test migration');
       expect(migrateOut).toContain(
@@ -71,17 +71,17 @@ describe('Command line', () => {
       `
       );
 
-      const checkOut2 = runCommand('npm run nx-migrate:check');
-      expect(checkOut2).toContain('Run "npm run nx-migrate" to run the following migrations');
+      const checkOut2 = runCommand('npm run update:check');
+      expect(checkOut2).toContain('Run "npm run update" to run the following migrations');
       expect(checkOut2).toContain('20200102-test-migration');
 
-      const skipOut = runCommand('npm run nx-migrate:skip');
+      const skipOut = runCommand('npm run update:skip');
       expect(skipOut).toContain(
         `The latestMigration property in .angular-cli.json has been set to "20200102-test-migration".`
       );
 
-      expect(runCommand('npm run nx-migrate:check')).not.toContain('IMPORTANT');
-      expect(runCommand('npm run nx-migrate')).toContain('No migrations to run');
+      expect(runCommand('npm run update:check')).not.toContain('IMPORTANT');
+      expect(runCommand('npm run update')).toContain('No migrations to run');
     },
     1000000
   );
@@ -114,6 +114,7 @@ describe('Command line', () => {
     () => {
       newProject();
       newApp('myapp');
+      newLib('mylib');
       updateFile(
         'apps/myapp/src/main.ts',
         `
@@ -135,14 +136,26 @@ describe('Command line', () => {
     `
       );
 
+      updateFile(
+        'libs/mylib/index.ts',
+        `
+         const x = 1111;
+    `
+      );
+      updateFile(
+        'libs/mylib/src/mylib.module.ts',
+        `
+         const y = 1111;
+    `
+      );
+
       try {
-        // this will group it by app, so all three files will be "marked"
-        runCommand('npm run -s format:check -- --files="apps/myapp/src/app/app.module.ts" --libs-and-apps');
+        // this will group it by lib, so all three files will be "marked"
+        runCommand('npm run -s format:check -- --files="libs/mylib/index.ts" --libs-and-apps');
         fail('boom');
       } catch (e) {
-        expect(e.stdout.toString()).toContain('apps/myapp/src/main.ts');
-        expect(e.stdout.toString()).toContain('apps/myapp/src/app/app.module.ts');
-        expect(e.stdout.toString()).toContain('apps/myapp/src/app/app.component.ts');
+        expect(e.stdout.toString()).toContain('libs/mylib/index.ts');
+        expect(e.stdout.toString()).toContain('libs/mylib/src/mylib.module.ts');
       }
 
       try {
