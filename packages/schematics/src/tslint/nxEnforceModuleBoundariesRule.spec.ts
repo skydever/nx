@@ -6,7 +6,7 @@ import { Rule } from './nxEnforceModuleBoundariesRule';
 describe('Enforce Module Boundaries', () => {
   it('should not error when everything is in order', () => {
     const failures = runRule(
-      { allow: ['@mycompany/mylib/deep'] },
+      { allow: ['@mycompany/mylib/deep'], lazyLoad: ['myliblazy'] },
       `
       import '@mycompany/mylib';
       import '@mycompany/mylib/deep';
@@ -130,14 +130,14 @@ function runRuleToCheckForRelativeImport(content: string): RuleFailure[] {
   };
 
   const sourceFile = ts.createSourceFile(
-    'proj/libs/dir/mylib/src/module.t',
+    '/proj/libs/dir/mylib/src/module.t',
     content,
     ts.ScriptTarget.Latest,
     true
   );
   const rule = new Rule(
     options,
-    'proj',
+    '/proj',
     'mycompany',
     ['dir/mylib', 'dir/mylib2'],
     [],
