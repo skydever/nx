@@ -117,9 +117,9 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
      **/
     const targetFile = path
       .resolve(this.projectPath + path.dirname(sourceFile), imp)
+      .substring(this.projectPath.length + 1)
       .split(path.sep)
-      .join('/')
-      .substring(this.projectPath.length + 1);
+      .join('/');
     if (!this.libraryRoot()) return false;
     return !(targetFile.startsWith(`${this.libraryRoot()}/`) || targetFile === this.libraryRoot());
   }
