@@ -90,7 +90,7 @@ describe('Enforce Module Boundaries', () => {
     expect(failures[0].getFailure()).toEqual('imports of lazy-loaded libraries are forbidden');
   });
 
-  it('should error on importing an app', () => {
+  it('should error on importing an app (using npmScope)', () => {
     const failures = runRule({ lazyLoad: ['libgroup/mylib'] }, `import '@mycompany/myapp';`);
 
     expect(failures.length).toEqual(1);
