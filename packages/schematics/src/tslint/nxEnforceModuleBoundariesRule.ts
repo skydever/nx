@@ -55,13 +55,6 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
     private roots: string[]
   ) {
     super(sourceFile, options);
-    //
-    // TODO
-    // remove sort completely in favor of appending '/' at libraryRoot()?
-    // sort logic does not work for lazyLoaded, so one logic to check for name collision?
-    //
-    // fix: sort from longest to shortest
-    this.roots = [...roots].sort((a, b) => b.length - a.length);
   }
 
   public visitImportDeclaration(node: ts.ImportDeclaration) {
@@ -137,7 +130,7 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
   }
 
   private isAbsoluteImportIntoAnotherProject(imp: string): boolean {
-    return imp.startsWith('libs/') || (imp.startsWith('/libs/') && imp.startsWith('apps/')) || imp.startsWith('/apps/');
+    return imp.startsWith('libs/') || (imp.startsWith('/libs/') || imp.startsWith('apps/')) || imp.startsWith('/apps/');
   }
 
   private isRelative(s: string): boolean {
