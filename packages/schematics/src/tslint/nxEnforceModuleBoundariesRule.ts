@@ -197,6 +197,8 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
       targetFile = this.normalizePath(path.resolve(path.dirname(this.getSourceFile().fileName), imp));      
     } else if (imp.startsWith(`@${this.npmScope}/`)) {
       targetFile = this.normalizePath(imp.replace(`@${this.npmScope}`, `${this.projectPath}/libs`));
+      if (!this.getRoot(targetFile))
+        targetFile = this.normalizePath(imp.replace(`@${this.npmScope}`, `${this.projectPath}/apps`));
     }
 
     return this.getRoot(targetFile);;
