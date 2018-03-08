@@ -103,8 +103,9 @@ describe('Enforce Module Boundaries', () => {
 function runRule(
   ruleArguments: any,
   content: string,
-  libNames: string[] = ['mylib'],
-  appNames: string[] = []
+  libNames: string[] = ['libgroupdir/mylib', 'libgroupdir/mylib2', 'libgroupdir/myliblazy'],
+  appNames: string[] = ['myapp', 'myapp2'],
+  roots: string[] = ['libs/mylib', 'libs/mylib2', 'apps/myapp', 'apps/myapp2']
 ): RuleFailure[] {
   const options: any = {
     ruleArguments: [ruleArguments],
@@ -113,12 +114,12 @@ function runRule(
   };
 
   const sourceFile = ts.createSourceFile(
-    'proj/apps/myapp/src/main.ts',
+    '/proj/apps/myapp/src/main.ts',
     content,
     ts.ScriptTarget.Latest,
     true
   );
-  const rule = new Rule(options, 'proj', 'mycompany', libNames, appNames, []);
+  const rule = new Rule(options, '/proj', 'mycompany', libNames, appNames, roots);
   return rule.apply(sourceFile);
 }
 
@@ -130,7 +131,7 @@ function runRuleToCheckForRelativeImport(content: string): RuleFailure[] {
   };
 
   const sourceFile = ts.createSourceFile(
-    '/proj/libs/dir/mylib/src/module.t',
+    '/proj/libs/mylib/src/module.t',
     content,
     ts.ScriptTarget.Latest,
     true
@@ -139,9 +140,9 @@ function runRuleToCheckForRelativeImport(content: string): RuleFailure[] {
     options,
     '/proj',
     'mycompany',
-    ['dir/mylib', 'dir/mylib2'],
-    [],
-    ['libs/dir/mylib', 'libs/dir/mylib2']
+    ['mylib', 'mylib2', 'myliblazy'],
+    ['myapp', 'myapp2'],
+    ['libs/mylib', 'libs/mylib2', 'apps/myapp', 'apps/myapp2']
   );
   return rule.apply(sourceFile);
 }
