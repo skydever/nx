@@ -55,6 +55,8 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
     private roots: string[]
   ) {
     super(sourceFile, options);
+    // sort from longest to shortest to avoid name collision
+    this.roots = [...roots].sort((a, b) => b.length - a.length);
   }
 
   public visitImportDeclaration(node: ts.ImportDeclaration) {
@@ -65,10 +67,35 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
     const lazyLoad: string[] = Array.isArray(this.getOptions()[0].lazyLoad)
       ? this.getOptions()[0].lazyLoad.map(a => `${a}`)
       : [];
+    const sourceRoot = this.sourceRoot();
+    const targetRoot = this.targetRoot(imp);
 
     // whitelisted import => return
     if (allow.indexOf(imp) > -1) {
       super.visitImportDeclaration(node);
+      return;
+    }
+
+    // relative using npmScope is forbidden
+    if (imp.startsWith(`@${this.npmScope}/.`)) {
+      this.addFailureAt(node.getStart(), node.getWidth(), `relative imports using @${this.npmScope}/ are forbidden`);
+      return;
+    }
+
+    // source or target is not part of nx app/lib or import into same nx app/lib => return
+    if (!sourceRoot || !targetRoot || (this.isRelative(imp) && sourceRoot === targetRoot)) {
+      super.visitImportDeclaration(node);
+      return;
+    }
+
+    // absolute import into same nx app/lib is allowed (agree?)
+    if ((imp.startsWith('apps/') || imp.startsWith('libs/')) && sourceRoot === targetRoot) {
+      super.visitImportDeclaration(node);
+      return;
+    }
+
+    if (targetRoot.startsWith('apps/')) {
+      this.addFailureAt(node.getStart(), node.getWidth(), 'imports of apps are forbidden');
       return;
     }
 
@@ -80,57 +107,40 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
       return;
     }
 
-    if (this.libNames.filter(l => imp === `@${this.npmScope}/${l}`).length > 0) {
-      super.visitImportDeclaration(node);
-      return;
-    }
-
-    if (this.isRelativeImportIntoAnotherProject(imp) || this.isAbsoluteImportIntoAnotherProject(imp)) {
-      this.addFailureAt(node.getStart(), node.getWidth(), `library imports must start with @${this.npmScope}/`);
-      return;
-    }
-
     const deepImport = this.libNames.filter(l => imp.startsWith(`@${this.npmScope}/${l}/`))[0];
     if (deepImport) {
       this.addFailureAt(node.getStart(), node.getWidth(), 'deep imports into libraries are forbidden');
       return;
     }
 
-    const appImport = this.appNames.filter(
-      a => imp.startsWith(`@${this.npmScope}/${a}/`) || imp === `@${this.npmScope}/${a}`
-    )[0];
-    if (appImport) {
-      this.addFailureAt(node.getStart(), node.getWidth(), 'imports of apps are forbidden');
+    if (!(this.libNames.filter(l => imp === `@${this.npmScope}/${l}`).length > 0)) {
+      this.addFailureAt(node.getStart(), node.getWidth(), `library imports must start with @${this.npmScope}/`);
       return;
     }
 
     super.visitImportDeclaration(node);
   }
 
-  private isRelativeImportIntoAnotherProject(imp: string): boolean {
-    if (!this.isRelative(imp)) return false;
-    const sourceFile = this.getSourceFile().fileName.substring(this.projectPath.length);
-    /**
-     * include projectPath for resolve (windows compatibility, eg. c:\)
-     * and remove including leading slash afterwards for import comparison.
-     * be sure separator is '/' like at the import statements.
-     **/
-    const targetFile = path
-      .resolve(this.projectPath + path.dirname(sourceFile), imp)
-      .substring(this.projectPath.length + 1)
-      .split(path.sep)
-      .join('/');
-    if (!this.libraryRoot()) return false;
-    return !(targetFile.startsWith(`${this.libraryRoot()}/`) || targetFile === this.libraryRoot());
-  }
-
-  private libraryRoot(): string {
+  private sourceRoot(): string {
     const sourceFile = this.getSourceFile().fileName.substring(this.projectPath.length + 1);
-    return this.roots.filter(r => sourceFile.startsWith(`${r}/`))[0];
+    return this.roots.filter(r => sourceFile.startsWith(r))[0];
   }
 
-  private isAbsoluteImportIntoAnotherProject(imp: string): boolean {
-    return imp.startsWith('libs/') || (imp.startsWith('/libs/') || imp.startsWith('apps/')) || imp.startsWith('/apps/');
+  private targetRoot(imp: string): string {
+    if (this.isRelative(imp)) {
+      const targetFile = path.resolve(path.dirname(this.getSourceFile().fileName), imp)
+        .substring(this.projectPath.length + 1)
+        .split(path.sep)
+        .join('/');
+      return this.roots.filter(r => targetFile.startsWith(r))[0];
+    } else if (imp.startsWith(`@${this.npmScope}/`)) {
+      const impNoScope = imp.substring(this.npmScope.length + 1);
+      return this.roots.filter(r => impNoScope.startsWith(r.substring(r.indexOf('/'))))[0];
+    } else if (imp.startsWith('apps/') || imp.startsWith('libs/')) {
+      return this.roots.filter(r => imp.startsWith(`${r}/`) || imp === r)[0];
+    }
+
+    return '';
   }
 
   private isRelative(s: string): boolean {
