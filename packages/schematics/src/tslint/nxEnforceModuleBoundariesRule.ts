@@ -4,6 +4,7 @@ import { IOptions } from 'tslint';
 import * as ts from 'typescript';
 import { readFileSync } from 'fs';
 import * as appRoot from 'app-root-path';
+import * as minimatch from 'minimatch';
 
 export class Rule extends Lint.Rules.AbstractRule {
   /**
@@ -107,10 +108,6 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
   public visitImportDeclaration(node: ts.ImportDeclaration) {
     // imp: the import (example: "@myworkspace/mylib", "../comp/comp.component")
     const imp = node.moduleSpecifier.getText().substring(1, node.moduleSpecifier.getText().length - 1);
-    // allow: whitelisted imports from rule options(example: "@myworkspace/mylib/scr/deep.service", "../../libs/mylib/src/deep.service")
-    const allow: string[] = Array.isArray(this.getOptions()[0].allow)
-      ? this.getOptions()[0].allow.map(a => `${a}`)
-      : [];
     // lazy loaded lib names from rule options (example: "mylib", "libgroup/mylib")
     const lazyLoad: string[] = Array.isArray(this.getOptions()[0].lazyLoad)
       ? this.getOptions()[0].lazyLoad.map(a => `${a}`)
@@ -121,7 +118,7 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
     const targetRoot = this.targetRoot(imp);
 
     // whitelisted import => return
-    if (allow.indexOf(imp) > -1) {
+    if (this.isWhitelisted(imp)) {
       super.visitImportDeclaration(node);
       return;
     }
@@ -177,6 +174,14 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
     }
 
     super.visitImportDeclaration(node);
+  }
+
+  private isWhitelisted(imp: string): boolean {
+    // allow: whitelisted imports from rule options (glob support)
+    const allow: string[] = Array.isArray(this.getOptions()[0].allow)
+    ? this.getOptions()[0].allow.map(a => `${a}`)
+    : [];
+    return (allow.filter(a => minimatch(imp, a)).length > 0);
   }
 
   private sourceRoot(): string {

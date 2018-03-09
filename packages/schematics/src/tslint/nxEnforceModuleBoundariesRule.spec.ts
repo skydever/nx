@@ -17,6 +17,19 @@ describe('Enforce Module Boundaries', () => {
     expect(failures.length).toEqual(0);
   });
 
+  it('should not error when glob is matching (deep import)', () => {
+    const failures = runRule(
+      { allow: ['@mycompany/**/deep'], lazyLoad: ['myliblazy'] },
+      `
+      import '@mycompany/libgroup/mylib';
+      import '@mycompany/libgroup/mylib/deep';
+      import '../blah';
+    `
+    );
+
+    expect(failures.length).toEqual(0);
+  });
+
   describe('relative imports', () => {
     it('should not error when relatively importing the same library', () => {
       const failures = runRuleToCheckForRelativeImport('import "../libgroup/mylib2"');
