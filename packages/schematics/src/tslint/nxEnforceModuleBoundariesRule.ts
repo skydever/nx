@@ -168,7 +168,11 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
 
     // relative imports of other libs are forbidden
     if (!(this.libNames.filter(l => imp === `@${this.npmScope}/${l}`).length > 0)) {
-      this.addError(node, `library imports must start with @${this.npmScope}/`);
+      if (this.appNames.filter(a => imp === `@${this.npmScope}/${a}`).length > 0) {
+        this.addError(node, 'imports of apps are forbidden');
+      } else {
+        this.addError(node, `library imports must start with @${this.npmScope}/`);
+      }
       return;
     }
 
@@ -209,7 +213,7 @@ class EnforceModuleBoundariesWalker extends Lint.RuleWalker {
      * fileOrDir: path fo file/dir starting from project root
      * (example: "apps/myapp/src/app/app.module.ts")
      */
-    let projectFileOrDir = this.normalizePath(fileOrDir).replace(this.projectPath, '');
+    let projectFileOrDir = this.normalizePath(fileOrDir.replace(this.projectPath, ''));
     projectFileOrDir = projectFileOrDir.startsWith('/') ? projectFileOrDir.substring(1) : projectFileOrDir;
 
     return this.roots.filter(r => projectFileOrDir.startsWith(r))[0];
