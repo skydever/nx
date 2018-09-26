@@ -59,6 +59,15 @@ describe('lib', () => {
     expect(angularJson.projects.lib1.architect.lint.options.tsConfig).toContain(
       'libs/lib1/tsconfig.spec.json'
     );
+    expect(
+      angularJson.projects.lib1.architect.lint.options.tsConfig.reduce(
+        (uniqueArray, tsConfig) => {
+          if (!uniqueArray.includes(tsConfig)) uniqueArray.push(tsConfig);
+          return uniqueArray;
+        },
+        []
+      ).length
+    ).toEqual(angularJson.projects.lib1.architect.lint.options.tsConfig.length);
   });
 
   it('should create a jest.config.js', () => {
