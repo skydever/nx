@@ -1,6 +1,7 @@
 import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { Tree, VirtualTree } from '@angular-devkit/schematics';
+import { readJsonInTree } from '@nrwl/schematics/src/utils/ast-utils';
 
 describe('workspace', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -73,5 +74,80 @@ describe('workspace', () => {
     expect(() => {
       schematicRunner.runSchematic('ng-add', { name: 'myApp' }, appTree);
     }).toThrow('Can only convert projects with one app');
+  });
+
+  it('should convert all fileReplacement paths in angular.json', () => {
+    appTree.create('/package.json', JSON.stringify({}));
+    appTree.create('/e2e/protractor.conf.js', '');
+    appTree.create(
+      '/angular.json',
+      JSON.stringify({
+        projects: {
+          proj1: {
+            architect: {
+              build: {
+                configurations: {
+                  dev: {
+                    fileReplacements: {
+                      replace: 'src/environments/environment.ts',
+                      with: 'src/environments/environment.dev.ts'
+                    }
+                  },
+                  staging: {
+                    fileReplacements: {
+                      replace: 'src/environments/environment.ts',
+                      with: 'src/environments/environment.staging.ts'
+                    }
+                  },
+                  production: {
+                    fileReplacements: {
+                      replace: 'src/environments/environment.ts',
+                      with: 'src/environments/environment.prod.ts'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+    );
+    const resultTree = schematicRunner.runSchematic(
+      'ng-add',
+      { name: 'myApp' },
+      appTree
+    );
+    const angularJson = readJsonInTree(resultTree, 'angular.json');
+    expect(angularJson).toEqual({
+      projects: {
+        proj1: {
+          projectType: 'application',
+          architect: {
+            build: {
+              configurations: {
+                dev: {
+                  fileReplacements: {
+                    replace: 'apps/proj1/src/environments/environment.ts',
+                    with: 'apps/proj1/src/environments/environment.dev.ts'
+                  }
+                },
+                staging: {
+                  fileReplacements: {
+                    replace: 'apps/proj1/src/environments/environment.ts',
+                    with: 'apps/proj1/src/environments/environment.staging.ts'
+                  }
+                },
+                production: {
+                  fileReplacements: {
+                    replace: 'apps/proj1/src/environments/environment.ts',
+                    with: 'apps/proj1/src/environments/environment.prod.ts'
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
   });
 });
