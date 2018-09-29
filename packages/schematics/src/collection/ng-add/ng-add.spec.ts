@@ -72,7 +72,7 @@ describe('workspace', () => {
       })
     );
     expect(() => {
-      schematicRunner.runSchematic('ng-add', { name: 'myApp' }, appTree);
+      schematicRunner.runSchematic('ng-add', { name: 'proj1' }, appTree);
     }).toThrow('Can only convert projects with one app');
   });
 
@@ -84,6 +84,8 @@ describe('workspace', () => {
       JSON.stringify({
         projects: {
           proj1: {
+            sourceRoot: 'src',
+            projectType: 'application',
             architect: {
               build: {
                 configurations: {
@@ -114,13 +116,14 @@ describe('workspace', () => {
     );
     const resultTree = schematicRunner.runSchematic(
       'ng-add',
-      { name: 'myApp' },
+      { name: 'proj1' },
       appTree
     );
     const angularJson = readJsonInTree(resultTree, 'angular.json');
     expect(angularJson).toEqual({
       projects: {
         proj1: {
+          sourceRoot: 'src',
           projectType: 'application',
           architect: {
             build: {
