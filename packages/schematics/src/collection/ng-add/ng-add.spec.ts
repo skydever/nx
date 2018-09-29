@@ -88,6 +88,9 @@ describe('workspace', () => {
             projectType: 'application',
             architect: {
               build: {
+                options: {
+                  tsConfig: ''
+                },
                 configurations: {
                   dev: {
                     fileReplacements: {
@@ -107,6 +110,17 @@ describe('workspace', () => {
                       with: 'src/environments/environment.prod.ts'
                     }
                   }
+                }
+              },
+              test: {
+                options: {
+                  karmaConfig: '',
+                  tsConfig: ''
+                }
+              },
+              server: {
+                options: {
+                  tsConfig: ''
                 }
               }
             }
