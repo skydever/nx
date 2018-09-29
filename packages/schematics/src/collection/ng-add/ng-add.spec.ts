@@ -2,7 +2,7 @@ import { SchematicTestRunner } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { Tree, VirtualTree } from '@angular-devkit/schematics';
 import { readJsonInTree } from '@nrwl/schematics/src/utils/ast-utils';
-import { writeFileSync } from 'fs';
+import { writeJsonSync } from 'fs-extra';
 
 describe('workspace', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -80,7 +80,7 @@ describe('workspace', () => {
   it('should convert all fileReplacement paths in angular.json', () => {
     appTree.create('/package.json', JSON.stringify({}));
     appTree.create('/src/tslint.json', JSON.stringify({}));
-    writeFileSync('/src/tslint.json', '{}');
+    writeJsonSync('./src/tslint.json', '{}');
     appTree.create('/e2e/protractor.conf.js', '');
     appTree.create(
       '/angular.json',
