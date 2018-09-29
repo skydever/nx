@@ -78,6 +78,7 @@ describe('workspace', () => {
 
   it('should convert all fileReplacement paths in angular.json', () => {
     appTree.create('/package.json', JSON.stringify({}));
+    appTree.create('/src/tslint.json', JSON.stringify({}));
     appTree.create('/e2e/protractor.conf.js', '');
     appTree.create(
       '/angular.json',
