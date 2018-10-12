@@ -95,7 +95,7 @@ If you want to file a bug or submit a PR, read up on our [guidelines for contrib
 
 ## Core Team
 
-Victor Savkin | Jason Jean | Benjamin Cabanes
------------- | ------------- | ------------- 
-![Victor Savkin](https://github.com/nrwl/nx/blob/master/static/victor_pic.jpg) | ![Jason Jean](https://github.com/nrwl/nx/blob/master/static/jason_pic.jpg) | ![Benjamin Cabanes](https://github.com/nrwl/nx/blob/master/static/ben_pic.jpg)
-[vsavkin](https://github.com/vsavkin)|[FrozenPandaz](https://github.com/FrozenPandaz)|[bcabanes](https://github.com/bcabanes)
+| Victor Savkin                                                                  | Jason Jean                                                                 | Benjamin Cabanes                                                               |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| ![Victor Savkin](https://github.com/nrwl/nx/blob/master/static/victor_pic.jpg) | ![Jason Jean](https://github.com/nrwl/nx/blob/master/static/jason_pic.jpg) | ![Benjamin Cabanes](https://github.com/nrwl/nx/blob/master/static/ben_pic.jpg) |
+| [vsavkin](https://github.com/vsavkin)                                          | [FrozenPandaz](https://github.com/FrozenPandaz)                            | [bcabanes](https://github.com/bcabanes)                                        |
