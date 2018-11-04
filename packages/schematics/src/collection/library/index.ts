@@ -463,7 +463,11 @@ function normalizeOptions(host: Tree, options: Schema): NormalizedSchema {
 
   const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-');
   const projectRoot = `libs/${projectDirectory}`;
-  const moduleName = `${toClassName(projectName)}Module`;
+  const moduleName = `${
+    options.moduleName
+      ? toClassName(options.moduleName)
+      : toClassName(projectName)
+  }Module`;
   const parsedTags = options.tags
     ? options.tags.split(',').map(s => s.trim())
     : [];

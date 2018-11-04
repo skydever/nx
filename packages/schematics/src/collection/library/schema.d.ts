@@ -7,6 +7,7 @@ export interface Schema {
   sourceDir?: string;
   publishable: boolean;
   module: boolean;
+  moduleName?: string;
 
   spec?: boolean;
   flat?: boolean;

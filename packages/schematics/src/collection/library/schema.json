@@ -70,6 +70,10 @@
       "description": "Include an NgModule in the library.",
       "x-prompt": "Would you like to generate an NgModule within the library?"
     },
+    "moduleName": {
+      "type": "string",
+      "description": "Name of the NgModule in the library"
+    },
     "tags": {
       "type": "string",
       "description": "Add tags to the library (used for linting)",
